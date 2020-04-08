@@ -1,0 +1,21 @@
+Index: web/modules/contrib/yaml_content/src/Plugin/yaml_content/process/File.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- web/modules/contrib/yaml_content/src/Plugin/yaml_content/process/File.php	(date 1586335657973)
++++ web/modules/contrib/yaml_content/src/Plugin/yaml_content/process/File.php	(date 1586335657973)
+@@ -44,6 +44,13 @@
+         }
+       }
+ 
++      // Check if the filename is a path and prepare the directory accordingly
++      $pathinfos = pathinfo($filename);
++      if ($pathinfos['basename'] != $filename) {
++        $destination .= $pathinfos['dirname'] . '/';
++        $filename = $pathinfos['basename'];
++      }
++
+       // Create the destination directory if it does not already exist.
+       file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
+ 
