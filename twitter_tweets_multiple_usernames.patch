@@ -1,0 +1,84 @@
+Index: web/modules/contrib/twitter_tweets/src/Plugin/Block/TweetsBlock.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- web/modules/contrib/twitter_tweets/src/Plugin/Block/TweetsBlock.php	(date 1602682659343)
++++ web/modules/contrib/twitter_tweets/src/Plugin/Block/TweetsBlock.php	(date 1602682659343)
+@@ -20,28 +20,53 @@
+    */
+   public function build() {
+     $config = \Drupal::config('twitter_tweets.credentials');
+-    $settings = array();
+-    $settings['oauth_access_token'] = $config->get('oauth_access_token');
+-    $settings['oauth_access_token_secret'] = $config->get('oauth_access_token_secret');
+-    $settings['consumer_key'] = $config->get('consumer_key');
+-    $settings['consumer_secret'] = $config->get('consumer_secret');
+-    $screen_name = $config->get('screen_name');
+-    $tweet_count = $config->get('tweet_count');
+-    $url = 'https://api.twitter.com/1.1/statuses/user_timeline.json';
+-    $getfield = '?screen_name='.$screen_name.'&count=' . $tweet_count;
+-    $requestMethod = 'GET';
+-    $twitter = new TwitterAPIExchange($settings);
+-    $tweets = $twitter->setGetfield($getfield) ->buildOauth($url, $requestMethod)->performRequest();
++    $settings = $this->getSettings();
++      $tweet_count = $config->get('tweet_count') > 0 ? $config->get('tweet_count') : 20;
++    $screen_name = $config->get('screen_name');
++    // check if there is multiple twwet usernames
++      $usernames = explode(',', $screen_name);
++      $cleanTweets = [];
++      foreach ($usernames as $username) {
++          $cleanTweets = array_merge($cleanTweets, $this->grabTweets($username));
++      }
++      usort($cleanTweets, function($a, $b) {
++          $ta = strtotime($a->created_at);
++          $tb = strtotime($b->created_at);
++          if ($ta == $tb) {
++              return 0;
++          }
++          return ($ta < $tb) ? -1 : 1;
++      });
++      $cleanTweets = array_slice($cleanTweets, 0, $tweet_count);
++    $params = array('tweets' => $cleanTweets);
++    $tweet_template = array('#theme' => 'twitter_tweets_tweet_listing', '#params' => $params);
++    return $tweet_template;
++ }
++    public function getSettings() {
++        $config = \Drupal::config('twitter_tweets.credentials');
++        $settings = array();
++        $settings['oauth_access_token'] = $config->get('oauth_access_token');
++        $settings['oauth_access_token_secret'] = $config->get('oauth_access_token_secret');
++        $settings['consumer_key'] = $config->get('consumer_key');
++        $settings['consumer_secret'] = $config->get('consumer_secret');
++        return $settings;
++    }
++    public function grabTweets($username) {
++        $config = \Drupal::config('twitter_tweets.credentials');
++        $settings = $this->getSettings();
++        $tweet_count = $config->get('tweet_count');
++        $url = 'https://api.twitter.com/1.1/statuses/user_timeline.json';
++        $getfield = '?screen_name='.$username.'&count=' . $tweet_count;
++        $requestMethod = 'GET';
++        $twitter = new TwitterAPIExchange($settings);
++        $tweets = $twitter->setGetfield($getfield) ->buildOauth($url, $requestMethod)->performRequest();
+ 
+-    $tweets = json_decode($tweets);
+-    foreach($tweets as $tweet) {
+-    # print_r($tweet);
+-    $tweet->text = check_markup($tweet->text, 'full_html');
+-    $cleanTweets[] = $tweet;
+-    }
++        $tweets = json_decode($tweets);
++        foreach($tweets as $tweet) {
++            $tweet->text = check_markup($tweet->text, 'full_html');
++            $cleanTweets[] = $tweet;
++        }
+ 
+-    $params = array('tweets' => $cleanTweets);
+-    $tweet_template = array('#theme' => 'twitter_tweets_tweet_listing', '#params' => $params);
+-    return $tweet_template;
++        return $cleanTweets;
++    }
+  }
+- }
+\ No newline at end of file
