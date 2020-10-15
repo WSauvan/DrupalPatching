@@ -70,7 +70,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 -    }
 +        $tweets = json_decode($tweets);
 +        foreach($tweets as $tweet) {
-+            $tweet->text = check_markup($tweet->text, 'full_html');
++            $tweet->text = is_object($tweet) ? check_markup($tweet->text, 'full_html') : '';
 +            $cleanTweets[] = $tweet;
 +        }
  
