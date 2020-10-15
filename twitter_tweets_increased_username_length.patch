@@ -1,0 +1,56 @@
+Index: web/modules/contrib/twitter_tweets/src/Form/TwitterSettingsForm.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- web/modules/contrib/twitter_tweets/src/Form/TwitterSettingsForm.php	(date 1602767377213)
++++ web/modules/contrib/twitter_tweets/src/Form/TwitterSettingsForm.php	(date 1602767377213)
+@@ -6,20 +6,20 @@
+ 
+ 
+ class TwitterSettingsForm extends ConfigFormBase {
+-	
++
+     /**
+     *array An array of configuration object names that are editable
+ 	*/
+    protected function getEditableConfigNames() {
+    return ['twitter_tweets.credentials'];
+   }
+-  
++
+    public function getFormID() {
+     return 'twitter_settings_form';
+   }
+-  
++
+   public function buildForm(array $form, FormStateInterface $form_state) {
+-	  
++
+     $config = $this->config('twitter_tweets.credentials');  //since we are extending ConfigFormBase instaad of FormBase, it gives use access to the config object
+     $form['oauth_access_token'] = array(
+       '#type' => 'textfield',
+@@ -56,6 +56,7 @@
+       '#description' => t('Tweet Count'),
+       '#title' => t('Tweet Count'),
+       '#default_value' => $config->get('tweet_count'),
++      '#maxlength' => 1000,
+     );
+     return parent::buildForm($form,$form_state);
+   }
+@@ -66,7 +67,7 @@
+    *  $form -> An associative array containing the structure of the form.
+    *  $form_state -> An associative array containing the current state of the form.
+    */
+-   
++
+   public function submitForm(array &$form, FormStateInterface $form_state) {
+     $this->config('twitter_tweets.credentials')
+       ->set('oauth_access_token', $form_state->getValue('oauth_access_token'))
+@@ -77,4 +78,4 @@
+       ->set('tweet_count', $form_state->getValue('tweet_count'))
+       ->save();
+   }
+-}
+\ No newline at end of file
++}
