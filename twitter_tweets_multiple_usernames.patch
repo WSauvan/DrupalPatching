@@ -5,7 +5,7 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 ===================================================================
 --- web/modules/contrib/twitter_tweets/src/Plugin/Block/TweetsBlock.php	(date 1602682659343)
 +++ web/modules/contrib/twitter_tweets/src/Plugin/Block/TweetsBlock.php	(date 1602682659343)
-@@ -20,28 +20,54 @@
+@@ -20,28 +20,57 @@
     */
    public function build() {
      $config = \Drupal::config('twitter_tweets.credentials');
@@ -71,7 +71,10 @@ Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
 +        $cleanTweets = array();
 +        $tweets = json_decode($tweets);
 +        foreach($tweets as $tweet) {
-+            $tweet->text = is_object($tweet) ? check_markup($tweet->text, 'full_html') : '';
++            if (!is_object($tweet)) {
++              continue;
++            }
++            $tweet->text = check_markup($tweet->text, 'full_html');
 +            $cleanTweets[] = $tweet;
 +        }
  
